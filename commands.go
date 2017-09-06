@@ -7,6 +7,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"os"
 	"strings"
 )
 
@@ -42,15 +43,27 @@ func Get(commandName string) *Command {
 }
 
 // Run will run execute the command contained in cmdLine.
-func Run(cmdLine string) {
+func Run(cmdLine string) error {
 	cmdLine = strings.Trim(cmdLine, " \n")
 	cmdParts := strings.Split(cmdLine, " ")
 	cmdName := cmdParts[0]
 
 	cmd := Get(cmdName)
 	if cmd == nil {
-		panic(errors.New(fmt.Sprintf("%s - command not found.", cmdName)))
+		return errors.New(fmt.Sprintf("%s - command not found.", cmdName))
 	}
 
-	cmd.Run(cmd, cmdParts[1:])
+	doRun := true
+
+	cmd.Flags.Usage = func() {
+		fmt.Fprintf(os.Stderr, cmd.Usage)
+		cmd.Flags.PrintDefaults()
+		fmt.Print("\n")
+		doRun = false
+	}
+	cmd.Flags.Parse(cmdParts[1:])
+	if doRun {
+		cmd.Run(cmd, cmd.Flags.Args())
+	}
+	return nil
 }
