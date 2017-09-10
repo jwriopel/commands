@@ -4,7 +4,6 @@ package commands
 // and sub-commands. Heavily inspired by https://golang.org/src/cmd/go/internal/base/base.go
 
 import (
-	"errors"
 	"flag"
 	"fmt"
 	"os"
@@ -21,26 +20,28 @@ type Command struct {
 }
 
 // Contains all available commands.
-var commands = []*Command{HelpCommand}
+var commands map[string]*Command
 
-// Add a command to the list of available commands.
+func init() {
+	commands = make(map[string]*Command)
+	Add(HelpCommand)
+}
+
+// Add a Command.
 func Add(c *Command) {
-	for _, cmd := range commands {
-		if cmd.Name == c.Name {
-			return
-		}
+	if _, ok := commands[c.Name]; ok {
+		fmt.Fprintf(os.Stderr, "over writing existing command: %s\n", c.Name)
 	}
-	commands = append(commands, c)
+	commands[c.Name] = c
 }
 
 // Get looks up a command by name.
 func Get(commandName string) *Command {
-	for _, cmd := range commands {
-		if cmd.Name == commandName {
-			return cmd
-		}
+	command, ok := commands[commandName]
+	if !ok {
+		return nil
 	}
-	return nil
+	return command
 }
 
 // Run will run execute the command contained in cmdLine.
