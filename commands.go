@@ -11,6 +11,7 @@ import (
 	"strings"
 )
 
+// Command types are used for building subcommands.
 type Command struct {
 	Name  string
 	Usage string
@@ -50,7 +51,7 @@ func Run(cmdLine string) error {
 
 	cmd := Get(cmdName)
 	if cmd == nil {
-		return errors.New(fmt.Sprintf("%s - command not found.", cmdName))
+		return fmt.Errorf("%s - command not found", cmdName)
 	}
 
 	doRun := true

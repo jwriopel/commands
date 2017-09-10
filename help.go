@@ -5,6 +5,8 @@ import (
 	"os"
 )
 
+// HelpCommand is an example command that will print the Short description
+// for all registered commands.
 var HelpCommand = &Command{
 	Name:  "help",
 	Usage: "help",
